@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:news_application/app_dio.dart';
 import 'package:news_application/ui/news_main.dart';
 import 'package:news_application/ui/news_screen.dart';
 
-void main() {
+void main() async{
+  AppDio.init();
   runApp(const MyApp());
 }
 
