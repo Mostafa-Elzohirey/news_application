@@ -33,7 +33,7 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
   ];
   @override
   void initState() {
-    // TODO: implement initState
+
     super.initState();
     getNewsByCategory(categories[currentIndex]);
   }

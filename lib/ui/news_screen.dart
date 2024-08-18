@@ -16,7 +16,6 @@ class _NewsScreenState extends State<NewsScreen> {
   List<Articles> articles=[];
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getNewsByCategory(widget.category);
   }
