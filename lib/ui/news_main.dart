@@ -133,4 +133,7 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
     articles = newsResponse.articles;
     setState(() {});
   }
+  void navToSettings(){
+    Navigator.push(context, scaleRoute)
+  }
 }
