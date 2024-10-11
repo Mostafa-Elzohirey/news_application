@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import 'package:news_application/colors.dart';
 import 'package:news_application/model/news_response.dart';
+import 'package:news_application/ui/manager/news_cubit.dart';
 
 class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key, required this.category});
@@ -12,12 +11,12 @@ class NewsScreen extends StatefulWidget {
 }
 
 class _NewsScreenState extends State<NewsScreen> {
-
+final cubit = NewsCubit();
   List<Articles> articles=[];
   @override
   void initState() {
     super.initState();
-    getNewsByCategory(widget.category);
+    cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
   }
 
   @override
@@ -55,22 +54,6 @@ class _NewsScreenState extends State<NewsScreen> {
           ),
         );
       });
-
-
-  }
-  void getNewsByCategory(String category) async{
-    final response = await Dio().get(
-        "https://newsapi.org/v2/top-headlines",
-        queryParameters:{
-          "country":"us",
-          "category":category,
-          "apiKey":"2ed58f61455141cf8f8e60b3582dc5fb",
-
-        }
-    );
-    final newsResponse =NewsResponse.fromJson(response.data);
-    articles = newsResponse.articles;
-    setState(() {});
   }
 }
 

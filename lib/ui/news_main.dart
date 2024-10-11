@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:news_application/animations/scale_route.dart';
 import 'package:news_application/colors.dart';
 import 'package:news_application/db/Shared.dart';
+import 'package:news_application/ui/manager/news_cubit.dart';
 import 'package:news_application/ui/news_description.dart';
 import 'package:news_application/ui/settings.dart';
 
@@ -16,31 +16,15 @@ class NewsMainScreen extends StatefulWidget {
 }
 
 class _NewsMainScreenState extends State<NewsMainScreen> {
-  int currentIndex = 0;
-  bool isLoading = true;
-  final titles = [
-    'Business',
-    'Entertainment',
-    'Sports',
-    'Science',
-    'Technology ',
-  ];
+  final cubit= NewsCubit();
 
-  List<Articles> articles = [];
-  final categories = [
-    'business',
-    'entertainment',
-    'sports',
-    'science',
-    'technology',
-  ];
   @override
   void initState() {
     super.initState();
     if (PreferenceUtils.getString(PrefKeys.selectedCountry).isEmpty) {
       PreferenceUtils.setString(PrefKeys.selectedCountry, 'us');
     }
-    getNewsByCategory(categories[currentIndex]);
+    cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
   }
 
   @override
@@ -49,7 +33,7 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
       appBar: AppBar(
         foregroundColor: Colors.white,
         backgroundColor: appBarColor,
-        title: Text(titles[currentIndex]),
+        title: Text(cubit.titles[cubit.currentIndex]),
         actions: [
           IconButton(
               onPressed: () {
@@ -58,15 +42,15 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
               icon: const Icon(Icons.settings))
         ],
       ),
-      body: isLoading
+      body: cubit.isLoading
           ? const Center(
               child: CircularProgressIndicator(
               color: appBarColor,
             ))
           : ListView.builder(
-              itemCount: articles.length,
+              itemCount: cubit.articles.length,
               itemBuilder: (context, index) {
-                Articles article = articles[index];
+                Articles article = cubit.articles[index];
                 return Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -94,7 +78,7 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
                           child: InkWell(
                             onTap: () {
                               navToDescription(article.title, article.url);
-                              print(article.url);
+
                             },
                             child: Text(article.title),
                           ),
@@ -106,14 +90,14 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
               }),
       bottomNavigationBar: BottomNavigationBar(
           onTap: (selectedIndex) {
-            isLoading = true;
+            cubit.isLoading = true;
             setState(() {
-              currentIndex = selectedIndex;
-              getNewsByCategory(categories[currentIndex]);
+              cubit.currentIndex = selectedIndex;
+              cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
             });
           },
           elevation: 0,
-          currentIndex: currentIndex,
+          currentIndex: cubit.currentIndex,
           type: BottomNavigationBarType.shifting,
           unselectedItemColor: Colors.grey,
           selectedItemColor: appBarColor,
@@ -121,40 +105,40 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.business),
-              label: titles[currentIndex],
+              label: cubit.titles[cubit.currentIndex],
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.gamepad_outlined),
-              label: titles[currentIndex],
+              label: cubit.titles[cubit.currentIndex],
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.sports_soccer),
-              label: titles[currentIndex],
+              label: cubit.titles[cubit.currentIndex],
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.science),
-              label: titles[currentIndex],
+              label: cubit.titles[cubit.currentIndex],
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.biotech_outlined),
-              label: titles[currentIndex],
+              label: cubit.titles[cubit.currentIndex],
             ),
           ]),
     );
   }
 
-  void getNewsByCategory(String category) async {
-    final response = await Dio()
-        .get("https://newsapi.org/v2/top-headlines", queryParameters: {
-      "country": PreferenceUtils.getString(PrefKeys.selectedCountry),
-      "category": category,
-      "apiKey": "2ed58f61455141cf8f8e60b3582dc5fb",
-    });
-    isLoading = false;
-    final newsResponse = NewsResponse.fromJson(response.data);
-    articles = newsResponse.articles;
-    setState(() {});
-  }
+  // void getNewsByCategory(String category) async {
+  //   final response = await Dio()
+  //       .get("https://newsapi.org/v2/top-headlines", queryParameters: {
+  //     "country": PreferenceUtils.getString(PrefKeys.selectedCountry),
+  //     "category": category,
+  //     "apiKey": "2ed58f61455141cf8f8e60b3582dc5fb",
+  //   });
+  //   cubit.isLoading = false;
+  //   final newsResponse = NewsResponse.fromJson(response.data);
+  //   cubit.articles = newsResponse.articles;
+  //   setState(() {});
+  // }
 
   void navToSettings() {
     Navigator.push(
@@ -162,7 +146,7 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
       ScaleRoute(
         page: const Settings(),
       ),
-    ).then((value) => getNewsByCategory(categories[currentIndex]));
+    ).then((value) => cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]));
   }
 
   void navToDescription(String title, String url) {
