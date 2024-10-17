@@ -30,7 +30,7 @@ class NewsCubit extends Cubit<NewsState> {
       "category": category,
       "apiKey": "2ed58f61455141cf8f8e60b3582dc5fb",
     });
-    isLoading = false;
+    isLoading=false;
     final newsResponse = NewsResponse.fromJson(response.data);
     articles = newsResponse.articles;
     emit(GetNews());

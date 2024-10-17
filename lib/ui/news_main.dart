@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:news_application/animations/scale_route.dart';
 import 'package:news_application/colors.dart';
 import 'package:news_application/ui/manager/news_cubit.dart';
@@ -16,13 +17,23 @@ class NewsMainScreen extends StatefulWidget {
   State<NewsMainScreen> createState() => _NewsMainScreenState();
 }
 
-class _NewsMainScreenState extends State<NewsMainScreen> {
+class _NewsMainScreenState extends State<NewsMainScreen>
+    with TickerProviderStateMixin {
   final cubit = NewsCubit();
+  late final AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
+
+    // Initialize animation controller
+    _animationController = AnimationController(
+        vsync: this, duration: Duration(seconds: 3, milliseconds: 300));
+    _animationController.forward();
+    _animationController.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) print('completed');
+      cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
+    });
   }
 
   @override
@@ -31,7 +42,7 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
       create: (context) => cubit,
       child: BlocListener<NewsCubit, NewsState>(
         listener: (context, state) {
-if (state is NavToSettings) {
+          if (state is NavToSettings) {
             navToSettings();
           }
         },
@@ -54,13 +65,15 @@ if (state is NavToSettings) {
                   ),
                 ],
               ),
-              body: cubit.isLoading
-                  ? const Center(
-                child: CircularProgressIndicator(
-                  color: appBarColor,
-                ),
-              )
-                  : NewsScreen(category: cubit.categories[cubit.currentIndex]),
+              body: _animationController.status.isCompleted
+                  ? cubit.isLoading
+                      ? Center(
+                          child:
+                              Lottie.asset("assets/animations/Loading2.json"))
+                      : NewsScreen(
+                          category: cubit.categories[cubit.currentIndex])
+                  : Center(
+                      child: Lottie.asset('assets/animations/Loading.json')),
               bottomNavigationBar: BottomNavigationBar(
                 onTap: (selectedIndex) {
                   cubit.changeCategory(selectedIndex);
@@ -120,5 +133,11 @@ if (state is NavToSettings) {
       ),
     );
   }
-}
 
+  @override
+  void dispose() {
+    // Dispose animation controller
+    _animationController.dispose();
+    super.dispose();
+  }
+}
