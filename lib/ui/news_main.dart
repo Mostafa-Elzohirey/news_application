@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_application/animations/scale_route.dart';
 import 'package:news_application/colors.dart';
-import 'package:news_application/db/Shared.dart';
 import 'package:news_application/ui/manager/news_cubit.dart';
 import 'package:news_application/ui/news_description.dart';
+import 'package:news_application/ui/news_screen.dart';
 import 'package:news_application/ui/settings.dart';
 
-import '../model/news_response.dart';
+import 'manager/news_state.dart';
 
 class NewsMainScreen extends StatefulWidget {
   const NewsMainScreen({super.key});
@@ -16,129 +17,88 @@ class NewsMainScreen extends StatefulWidget {
 }
 
 class _NewsMainScreenState extends State<NewsMainScreen> {
-  final cubit= NewsCubit();
+  final cubit = NewsCubit();
 
   @override
   void initState() {
     super.initState();
-    if (PreferenceUtils.getString(PrefKeys.selectedCountry).isEmpty) {
-      PreferenceUtils.setString(PrefKeys.selectedCountry, 'us');
-    }
     cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        foregroundColor: Colors.white,
-        backgroundColor: appBarColor,
-        title: Text(cubit.titles[cubit.currentIndex]),
-        actions: [
-          IconButton(
-              onPressed: () {
-                navToSettings();
-              },
-              icon: const Icon(Icons.settings))
-        ],
-      ),
-      body: cubit.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-              color: appBarColor,
-            ))
-          : ListView.builder(
-              itemCount: cubit.articles.length,
-              itemBuilder: (context, index) {
-                Articles article = cubit.articles[index];
-                return Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      children: [
-                        article.urlToImage.isEmpty
-                            ? const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.image_not_supported_outlined,
-                                  size: 60,
-                                ),
-                              )
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.network(article.urlToImage)),
-                        Text(article.author),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 15),
-                          child: InkWell(
-                            onTap: () {
-                              navToDescription(article.title, article.url);
-
-                            },
-                            child: Text(article.title),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-      bottomNavigationBar: BottomNavigationBar(
-          onTap: (selectedIndex) {
-            cubit.isLoading = true;
-            setState(() {
-              cubit.currentIndex = selectedIndex;
-              cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
-            });
+    return BlocProvider(
+      create: (context) => cubit,
+      child: BlocListener<NewsCubit, NewsState>(
+        listener: (context, state) {
+if (state is NavToSettings) {
+            navToSettings();
+          }
+        },
+        child: BlocBuilder<NewsCubit, NewsState>(
+          buildWhen: (previous, current) {
+            return current is GetNews || current is ChangeCategory;
           },
-          elevation: 0,
-          currentIndex: cubit.currentIndex,
-          type: BottomNavigationBarType.shifting,
-          unselectedItemColor: Colors.grey,
-          selectedItemColor: appBarColor,
-          // backgroundColor: mainColor,
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.business),
-              label: cubit.titles[cubit.currentIndex],
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.gamepad_outlined),
-              label: cubit.titles[cubit.currentIndex],
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.sports_soccer),
-              label: cubit.titles[cubit.currentIndex],
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.science),
-              label: cubit.titles[cubit.currentIndex],
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.biotech_outlined),
-              label: cubit.titles[cubit.currentIndex],
-            ),
-          ]),
+          builder: (context, state) {
+            return Scaffold(
+              appBar: AppBar(
+                foregroundColor: Colors.white,
+                backgroundColor: appBarColor,
+                title: Text(cubit.titles[cubit.currentIndex]),
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      navToSettings();
+                    },
+                    icon: const Icon(Icons.settings),
+                  ),
+                ],
+              ),
+              body: cubit.isLoading
+                  ? const Center(
+                child: CircularProgressIndicator(
+                  color: appBarColor,
+                ),
+              )
+                  : NewsScreen(category: cubit.categories[cubit.currentIndex]),
+              bottomNavigationBar: BottomNavigationBar(
+                onTap: (selectedIndex) {
+                  cubit.changeCategory(selectedIndex);
+                },
+                elevation: 0,
+                currentIndex: cubit.currentIndex,
+                type: BottomNavigationBarType.shifting,
+                unselectedItemColor: Colors.grey,
+                selectedItemColor: appBarColor,
+                items: [
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.business),
+                    label: cubit.titles[0], // Corrected index
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.gamepad_outlined),
+                    label: cubit.titles[1], // Corrected index
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.sports_soccer),
+                    label: cubit.titles[2], // Corrected index
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.science),
+                    label: cubit.titles[3], // Corrected index
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.biotech_outlined),
+                    label: cubit.titles[4], // Corrected index
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
-
-  // void getNewsByCategory(String category) async {
-  //   final response = await Dio()
-  //       .get("https://newsapi.org/v2/top-headlines", queryParameters: {
-  //     "country": PreferenceUtils.getString(PrefKeys.selectedCountry),
-  //     "category": category,
-  //     "apiKey": "2ed58f61455141cf8f8e60b3582dc5fb",
-  //   });
-  //   cubit.isLoading = false;
-  //   final newsResponse = NewsResponse.fromJson(response.data);
-  //   cubit.articles = newsResponse.articles;
-  //   setState(() {});
-  // }
 
   void navToSettings() {
     Navigator.push(
@@ -146,7 +106,7 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
       ScaleRoute(
         page: const Settings(),
       ),
-    ).then((value) => cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]));
+    );
   }
 
   void navToDescription(String title, String url) {
@@ -161,3 +121,4 @@ class _NewsMainScreenState extends State<NewsMainScreen> {
     );
   }
 }
+

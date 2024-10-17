@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 
-import 'db/Shared.dart';
 
 class AppDio {
   static late Dio _dio;
@@ -16,7 +15,7 @@ class AppDio {
     required String category,
   }) {
     return _dio.get("", queryParameters: {
-      "country": PreferenceUtils.getString(PrefKeys.selectedCountry),
+      "country": "us",
       "category": category,
       "apiKey": "2ed58f61455141cf8f8e60b3582dc5fb",
     });

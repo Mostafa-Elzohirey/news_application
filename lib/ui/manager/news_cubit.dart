@@ -1,12 +1,11 @@
-
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../db/Shared.dart';
 import '../../model/news_response.dart';
 import 'news_state.dart';
 
 class NewsCubit extends Cubit<NewsState> {
   NewsCubit() : super(NewsInitial());
+
   int currentIndex = 0;
   bool isLoading = true;
   final titles = [
@@ -14,7 +13,7 @@ class NewsCubit extends Cubit<NewsState> {
     'Entertainment',
     'Sports',
     'Science',
-    'Technology ',
+    'Technology',
   ];
   List<Articles> articles = [];
   final categories = [
@@ -27,7 +26,7 @@ class NewsCubit extends Cubit<NewsState> {
   void getNewsByCategory(String category) async {
     final response = await Dio()
         .get("https://newsapi.org/v2/top-headlines", queryParameters: {
-      "country": PreferenceUtils.getString(PrefKeys.selectedCountry),
+      "country": "us",
       "category": category,
       "apiKey": "2ed58f61455141cf8f8e60b3582dc5fb",
     });
@@ -35,5 +34,20 @@ class NewsCubit extends Cubit<NewsState> {
     final newsResponse = NewsResponse.fromJson(response.data);
     articles = newsResponse.articles;
     emit(GetNews());
+  }
+
+  void navToSettings() {
+    emit(NavToSettings());
+  }
+
+  void navToDescription(index) {
+    emit(NavToDescription());
+  }
+
+  void changeCategory(int selectedIndex) {
+    isLoading = true;
+    currentIndex = selectedIndex;
+    emit(ChangeCategory());
+    getNewsByCategory(categories[currentIndex]);
   }
 }

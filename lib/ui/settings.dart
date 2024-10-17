@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:news_application/animations/scale_route.dart';
 
 import '../colors.dart';
-import '../db/Shared.dart';
-import 'news_select_country.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -30,11 +27,11 @@ class _SettingsState extends State<Settings> {
         children: [
           settingsItem(
             onTap: () {
-              navToSelectCountry();
+              // navToSelectCountry();
             },
             icon: Icons.language,
             title: "Country",
-            value: PreferenceUtils.getString(PrefKeys.selectedCountry)
+            value:"us"
           ),
           settingsItem(
               onTap: () {},
@@ -95,16 +92,16 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  void navToSelectCountry() {
-    Navigator.push(
-      context,
-      ScaleRoute(
-        page: const SelectCountry(),
-      ),
-    ).then(
-      (value) => setState(
-        () {},
-      ),
-    );
-  }
+  // void navToSelectCountry() {
+  //   Navigator.push(
+  //     context,
+  //     ScaleRoute(
+  //       page: const SelectCountry(),
+  //     ),
+  //   ).then(
+  //     (value) => setState(
+  //       () {},
+  //     ),
+  //   );
+  // }
 }
