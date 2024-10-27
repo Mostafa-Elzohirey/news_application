@@ -4,6 +4,8 @@ import 'package:news_application/model/news_response.dart';
 import 'package:news_application/ui/manager/news_cubit.dart';
 import 'package:news_application/ui/manager/news_state.dart';
 import '../animations/scale_route.dart';
+import '../colors.dart';
+import 'app manager/app_cubit.dart';
 import 'news_description.dart';
 
 class NewsScreen extends StatefulWidget {
@@ -21,6 +23,8 @@ class _NewsScreenState extends State<NewsScreen> {
     // Access the cubit provided by BlocProvider in NewsMainScreen
     final cubit = context.read<NewsCubit>();
 
+    return BlocBuilder<AppCubit, AppState>(
+  builder: (context, state) {
     return BlocBuilder<NewsCubit, NewsState>(
       buildWhen: (previous, current) {
         return current is GetNews;
@@ -43,7 +47,9 @@ class _NewsScreenState extends State<NewsScreen> {
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? darkColor
+                      : Colors.grey[300],
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Padding(
@@ -79,6 +85,8 @@ class _NewsScreenState extends State<NewsScreen> {
         );
       },
     );
+  },
+);
   }
 
   void navToDescription(String title, String url) {

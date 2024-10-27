@@ -2,7 +2,9 @@ import 'dart:async' show Future;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum PrefKeys{
-  selectedCountry
+  selectedCountry,
+
+  darkTheme
 }
 
 class PreferenceUtils {
@@ -18,11 +20,20 @@ class PreferenceUtils {
   }
 
   static String getString(PrefKeys key, [String defValue='']) {
-    return _prefsInstance?.getString(key.name) ?? defValue ?? "";
+    return _prefsInstance?.getString(key.name) ?? defValue;
   }
 
   static Future<bool> setString(PrefKeys key, String value) async {
     var prefs = await _instance;
     return prefs.setString(key.name, value);
+  }
+
+  static bool getBool(PrefKeys key, [bool defValue=false]) {
+    return _prefsInstance?.getBool(key.name) ?? defValue;
+  }
+
+  static Future<bool> setBool(PrefKeys key, bool value) async {
+    var prefs = await _instance;
+    return prefs.setBool(key.name, value);
   }
 }

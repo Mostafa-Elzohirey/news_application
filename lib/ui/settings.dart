@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-
-import '../colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news_application/colors.dart';
+import 'package:news_application/db/Shared.dart';
+import 'package:news_application/ui/app%20manager/app_cubit.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -13,26 +15,28 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      // backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: appBarColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        // backgroundColor: appBarColor,
+        // foregroundColor: Colors.white,
+
         title: const Text(
           "Settings",
-          style: TextStyle(color: Colors.white),
+          // style: TextStyle(color: Colors.white),
         ),
       ),
       body: Column(
         children: [
-          settingsItem(
-            onTap: () {
-              // navToSelectCountry();
-            },
-            icon: Icons.language,
-            title: "Country",
-            value:"us"
+          SizedBox(
+            height: 20,
           ),
+          settingsItem(
+              onTap: () {
+                // navToSelectCountry();
+              },
+              icon: Icons.language,
+              title: "Country",
+              value: "us"),
           settingsItem(
               onTap: () {},
               icon: Icons.language,
@@ -44,10 +48,14 @@ class _SettingsState extends State<Settings> {
               title: "Notifications",
               value: "On"),
           settingsItem(
-              onTap: () {},
+              onTap: () {
+                showThemeBottomSheet();
+              },
               icon: Icons.color_lens_rounded,
               title: "Theme",
-              value: "Light"),
+              value: Theme.of(context).brightness == Brightness.dark
+                  ? "Dark"
+                  : "Light"),
         ],
       ),
     );
@@ -62,14 +70,16 @@ class _SettingsState extends State<Settings> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: Colors.white,
+        color:
+            Theme.of(context).brightness == Brightness.dark
+            ? darkColor
+            : Colors.grey[300],
         margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.all(10),
         child: Row(
           children: [
             Icon(
               icon,
-              color: appBarColor,
             ),
             const SizedBox(
               width: 5,
@@ -90,6 +100,97 @@ class _SettingsState extends State<Settings> {
         ),
       ),
     );
+  }
+
+  void showThemeBottomSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: double.infinity,
+          height: 200,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                SizedBox(height: 20),
+                const Text('Select Theme'),
+                SizedBox(height: 10),
+                InkWell(
+                  onTap: () async {
+                    await PreferenceUtils.setBool(
+                      PrefKeys.darkTheme,
+                      false,
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? darkColor
+                        : Colors.grey[300],
+                    padding: EdgeInsets.all(10),
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        Icon(Icons.light_mode),
+                        SizedBox(width: 15,),
+                        const Text(
+                          'Light',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                InkWell(
+                  onTap: () async {
+                    await PreferenceUtils.setBool(
+                      PrefKeys.darkTheme,
+                      true,
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+
+                    decoration: BoxDecoration(
+                      color:Theme.of(context).brightness == Brightness.dark
+                          ? darkColor
+                          : Colors.grey[300],
+                    ),
+
+                    padding: EdgeInsets.all(10),
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        Icon(Icons.dark_mode),
+                        SizedBox(width: 15,),
+                        const Text(
+                          'Dark',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ).then((value) {
+      BlocProvider.of<AppCubit>(context).themeChanged();
+    });
   }
 
   // void navToSelectCountry() {

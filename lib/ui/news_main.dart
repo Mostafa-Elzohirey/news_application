@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:news_application/animations/scale_route.dart';
-import 'package:news_application/colors.dart';
 import 'package:news_application/ui/manager/news_cubit.dart';
 import 'package:news_application/ui/news_description.dart';
 import 'package:news_application/ui/news_screen.dart';
 import 'package:news_application/ui/settings.dart';
 
+import 'app manager/app_cubit.dart';
 import 'manager/news_state.dart';
 
 class NewsMainScreen extends StatefulWidget {
@@ -25,14 +25,13 @@ class _NewsMainScreenState extends State<NewsMainScreen>
   @override
   void initState() {
     super.initState();
-
-    // Initialize animation controller
     _animationController = AnimationController(
         vsync: this, duration: Duration(seconds: 3, milliseconds: 300));
     _animationController.forward();
     _animationController.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) print('completed');
-      cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
+      if (status == AnimationStatus.completed) {
+        cubit.getNewsByCategory(cubit.categories[cubit.currentIndex]);
+      }
     });
   }
 
@@ -53,8 +52,6 @@ class _NewsMainScreenState extends State<NewsMainScreen>
           builder: (context, state) {
             return Scaffold(
               appBar: AppBar(
-                foregroundColor: Colors.white,
-                backgroundColor: appBarColor,
                 title: Text(cubit.titles[cubit.currentIndex]),
                 actions: [
                   IconButton(
@@ -75,14 +72,14 @@ class _NewsMainScreenState extends State<NewsMainScreen>
                   : Center(
                       child: Lottie.asset('assets/animations/Loading.json')),
               bottomNavigationBar: BottomNavigationBar(
+
                 onTap: (selectedIndex) {
                   cubit.changeCategory(selectedIndex);
                 },
-                elevation: 0,
                 currentIndex: cubit.currentIndex,
                 type: BottomNavigationBarType.shifting,
-                unselectedItemColor: Colors.grey,
-                selectedItemColor: appBarColor,
+                // unselectedItemColor: Colors.grey,
+                // selectedItemColor: appBarColor,
                 items: [
                   BottomNavigationBarItem(
                     icon: const Icon(Icons.business),
@@ -119,7 +116,9 @@ class _NewsMainScreenState extends State<NewsMainScreen>
       ScaleRoute(
         page: const Settings(),
       ),
-    );
+    ).then((value) {
+      BlocProvider.of<AppCubit>(context).themeChanged();
+    });
   }
 
   void navToDescription(String title, String url) {
